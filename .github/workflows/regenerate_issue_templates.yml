@@ -53,26 +53,25 @@ jobs:
     runs-on: ubuntu-latest
     name: Create new workspace labels
     steps:
-      - uses: actions/github-script@v7
+      - name: Check if label exists
+        id: check-label
+        uses: actions/github-script@v5
         with:
           script: |
-            try {
-              const response = await github.rest.issues.createLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: 'workspace/tech-insights',
-                description: 'Used to tag tech-insights workspace issues and pull requests',
-              })
-              
-              if(response.status === 422) {
-                console.log(`Label already exists. Skipping.`);
-              } else {
-                console.log(`Label created successfully.`);
-              }
-            } catch (error) {
-              if (error.status === 422) {
-                console.log(`Label '${label.name}' already exists. Skipping.`);
-              } else {
-                console.error(`Error creating label '${label.name}': ${error}`);
-              }
-            }
+            const labelName = 'workspace/tech-insights';
+            const labels = await github.issues.listLabelsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            return labels.data.some(label => label.name === labelName);
+
+      - name: Create label if not exists
+        if: steps.check-label.outputs.result == 'false'
+        uses: actions/github-script@v5
+        with:
+          script: |
+            await github.issues.createLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'workspace/tech-insights',
+            });
