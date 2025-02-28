@@ -56,9 +56,17 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            github.rest.issues.createLabel({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'workspace/tech-insights',
-              description: 'Used to tag tech-insights workspace issues and pull requests',
-            })
+            try {
+              github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'workspace/tech-insights',
+                description: 'Used to tag tech-insights workspace issues and pull requests',
+              })
+            } catch (e) {
+              if(e.code === 'already_exists') {
+                console.log('Label already exists')
+              } else {
+                throw e
+              }
+            }
