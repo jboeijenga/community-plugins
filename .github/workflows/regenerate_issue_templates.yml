@@ -57,12 +57,18 @@ jobs:
         with:
           script: |
             try {
-              github.rest.issues.createLabel({
+              const response = await github.rest.issues.createLabel({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 name: 'workspace/tech-insights',
                 description: 'Used to tag tech-insights workspace issues and pull requests',
               })
+              
+              if(response.status === 422) {
+                console.log(`Label already exists. Skipping.`);
+              } else {
+                console.log(`Label created successfully.`);
+              }
             } catch (error) {
               if (error.status === 422) {
                 console.log(`Label '${label.name}' already exists. Skipping.`);
