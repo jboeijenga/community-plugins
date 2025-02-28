@@ -63,10 +63,10 @@ jobs:
                 name: 'workspace/tech-insights',
                 description: 'Used to tag tech-insights workspace issues and pull requests',
               })
-            } catch (e) {
-              if(e.code === 'already_exists') {
-                console.log('Label already exists')
+            } catch (error) {
+              if (error.status === 422) {
+                console.log(`Label '${label.name}' already exists. Skipping.`);
               } else {
-                throw e
+                console.error(`Error creating label '${label.name}': ${error}`);
               }
             }
